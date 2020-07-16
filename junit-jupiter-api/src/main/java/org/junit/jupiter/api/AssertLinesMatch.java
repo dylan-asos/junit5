@@ -22,7 +22,9 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * {@code AssertLinesMatch} is a collection of utility methods that support asserting
@@ -36,8 +38,8 @@ class AssertLinesMatch {
 		/* no-op */
 	}
 
-	private final static int MAX_SNIPPET_LENGTH = 21;
-	private final static int MAX_LINES_IN_FAILURE_MESSAGE = 42;
+	private static final int MAX_SNIPPET_LENGTH = 21;
+	private static final int MAX_LINES_IN_FAILURE_MESSAGE = 42;
 
 	static void assertLinesMatch(List<String> expectedLines, List<String> actualLines) {
 		assertLinesMatch(expectedLines, actualLines, (Object) null);
@@ -45,6 +47,28 @@ class AssertLinesMatch {
 
 	static void assertLinesMatch(List<String> expectedLines, List<String> actualLines, String message) {
 		assertLinesMatch(expectedLines, actualLines, (Object) message);
+	}
+
+	static void assertLinesMatch(Stream<String> expectedLines, Stream<String> actualLines) {
+		assertLinesMatch(expectedLines, actualLines, (Object) null);
+	}
+
+	static void assertLinesMatch(Stream<String> expectedLines, Stream<String> actualLines, String message) {
+		assertLinesMatch(expectedLines, actualLines, (Object) message);
+	}
+
+	static void assertLinesMatch(Stream<String> expectedLines, Stream<String> actualLines, Object messageOrSupplier) {
+		notNull(expectedLines, "expectedLines must not be null");
+		notNull(actualLines, "actualLines must not be null");
+
+		// trivial case: same stream instance
+		if (expectedLines == actualLines) {
+			return;
+		}
+
+		List<String> expectedListOfStrings = expectedLines.collect(Collectors.toList());
+		List<String> actualListOfStrings = actualLines.collect(Collectors.toList());
+		assertLinesMatch(expectedListOfStrings, actualListOfStrings, messageOrSupplier);
 	}
 
 	static void assertLinesMatch(List<String> expectedLines, List<String> actualLines, Object messageOrSupplier) {
